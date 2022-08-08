@@ -1,0 +1,43 @@
+router.post("/teams", async (req, res) => {
+  const { slug, name, manager, password } = req.body;
+
+  try {
+    if (!slug || !name || !manager || !password) {
+      throw Error("Informations missing.");
+    }
+
+    const findTeam = teamsDb.find((team) => {
+      team.slug === slug;
+    });
+
+    if (findTeam) {
+      throw Error("This team already exists.");
+    }
+
+    const passwordCrypto = await hash(password, 10, (errBcrypt, hash) => {
+      if (errBcrypt) {
+        return res.status(500).send({ error: errBcrypt });
+      }
+    });
+
+    const team = {
+      slug,
+      name,
+      manager,
+      password: passwordCrypto,
+    };
+
+    teamsDb.push(team);
+
+    return res.json(team);
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+});
+
+Eventos?
+router.get("/events", (req, res) => {
+  return res.json({
+    id: uuid(),
+  });
+});
